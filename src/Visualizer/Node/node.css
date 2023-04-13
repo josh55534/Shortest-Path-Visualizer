@@ -1,0 +1,25 @@
+.node {
+    display: flex;
+    background-color: white;
+    height: 29px;
+    width: 29px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+}
+
+.start {
+    background-color: #009900;
+}
+
+.finish {
+    background-color: #ac0606;
+}
+
+.visited {
+    background-color: #d4d800;
+}
+
+.wall {
+    background-color: #424242;
+}

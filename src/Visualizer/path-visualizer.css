@@ -1,0 +1,20 @@
+.header {
+    margin-bottom: 1em;
+}
+
+h1 {
+    margin-bottom: 0;
+}
+.gridBox {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.gridRow {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+}
