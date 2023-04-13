@@ -1,6 +1,8 @@
 import { useEffect, useInsertionEffect, useState } from "react";
 import { Node } from "./Node/node"
 import "./path-visualizer.css"
+import { dijkstra, pathFind } from "../algorithm/dijkstra";
+import path from "path";
 
 function PathVisualizer() {
     const [grid, setGrid] = useState([]);
@@ -22,6 +24,7 @@ function PathVisualizer() {
             isWall: false,
             isStart: xPos === START_X_POS && yPos === START_Y_POS,
             isFinish: xPos === FINISH_X_POS && yPos === FINISH_Y_POS,
+            isVisited: false,
             previousNode: null
         }
     }
@@ -49,19 +52,58 @@ function PathVisualizer() {
     };
 
     useEffect(() => {
-        console.log(grid)
         if (isLoading) {
             setGrid(setupGrid());
             setLoading(false);
         }
     })
 
+    const setVisited = (x, visited) => {
+        const node = visited[x];
+        document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node visited";
+    }
+
+    const setPath = (x, finish) => {
+
+        const node = finish[x];
+        console.log(x)
+        document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node path";
+    }
+
+    const createPath = (finish, x) => {
+        setTimeout(() => {
+            setPath(x, finish);
+            x--;
+            if (x > 0) createPath(finish, x);
+        }, 10);
+    }
+
+    const updateNodes = (visited, x, finish) => {
+        setTimeout(() => {
+            setVisited(x, visited);
+            x++;
+            if (x < visited.length - 1) updateNodes(visited, x, finish);
+            if (x == visited.length - 1) createPath(finish, finish.length - 3);
+        }, );
+    }
+
+    const startDijsktra = () => {
+        const startNode = grid[START_Y_POS][START_Y_POS];
+        const finishNode = grid[FINISH_Y_POS][FINISH_X_POS];
+
+        const visited = dijkstra(grid, startNode, finishNode);
+        const path = pathFind(finishNode);
+
+        console.log(path.length)
+        updateNodes(visited, 1, path);
+    }
+
     return (
         <>
             <div className="header">
                 <h1 className="title">Shortest Path Visualizer</h1>
                 <p>Click on a box to turn it into a wall. Click start to find the shortest path from the green box to the red.</p>
-                <button>Start</button>
+                <button onClick={startDijsktra}>Start</button>
             </div>
             <div id="gridBox" className="gridBox">
                 {grid.map((row, indexY) => (
@@ -73,7 +115,7 @@ function PathVisualizer() {
                                 isWall={col.isWall}
                                 isStart={col.isStart}
                                 isFinish={col.isFinish}
-                                onClick={() => {toggleWall(indexX, indexY)}}
+                                onClick={() => { toggleWall(indexX, indexY) }}
                             />
                         ))}
                     </div>

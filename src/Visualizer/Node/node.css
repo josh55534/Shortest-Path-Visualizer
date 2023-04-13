@@ -9,15 +9,19 @@
 }
 
 .start {
-    background-color: #009900;
+    background-color: #20b120;
 }
 
 .finish {
-    background-color: #ac0606;
+    background-color: #bb2929;
 }
 
 .visited {
-    background-color: #d4d800;
+    background-color: #f2f55c;
+}
+
+.path {
+    background-color: #980fa5
 }
 
 .wall {
