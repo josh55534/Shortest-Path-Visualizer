@@ -2,19 +2,29 @@ import { useEffect, useInsertionEffect, useState } from "react";
 import { Node } from "./Node/node"
 import "./path-visualizer.css"
 import { dijkstra, pathFind } from "../algorithm/dijkstra";
-import path from "path";
 
 function PathVisualizer() {
     const [grid, setGrid] = useState([]);
     const [isLoading, setLoading] = useState(true);
 
+    const [startPos, setStartPos] = useState([]);
+    const [finishPos, setFinishPos] = useState([]);
+
     const GRID_MAX_X = 40;
     const GRID_MAX_Y = 20;
 
-    const START_X_POS = 0;
-    const START_Y_POS = 0;
-    const FINISH_X_POS = GRID_MAX_X - 1;
-    const FINISH_Y_POS = GRID_MAX_Y - 1;
+    const reRender = () => {
+        for (var y in grid) {
+            for (var x in grid[0]) {
+                
+                const node = grid[y][x];
+                if(node.isStart) document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node start";
+                else if(node.isFinish) document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node finish";
+                else if(node.isWall) document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node wall";
+                else document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node";
+            }
+        }
+    }
 
     const createNode = (xPos, yPos) => {
         return {
@@ -22,8 +32,8 @@ function PathVisualizer() {
             yPos: yPos,
             distance: Infinity,
             isWall: false,
-            isStart: xPos === START_X_POS && yPos === START_Y_POS,
-            isFinish: xPos === FINISH_X_POS && yPos === FINISH_Y_POS,
+            isStart: xPos === startPos[1] && yPos === startPos[0],
+            isFinish: xPos === finishPos[1] && yPos === finishPos[0],
             isVisited: false,
             previousNode: null
         }
@@ -31,8 +41,18 @@ function PathVisualizer() {
 
     const toggleWall = (xPos, yPos) => {
         var newGrid = [...grid];
-        newGrid[yPos][xPos].isWall = !newGrid[yPos][xPos].isWall;
-        setGrid(newGrid);
+        if (!startPos.length) {
+            newGrid[yPos][xPos].isStart = true;
+            setStartPos([yPos, xPos]);
+        }
+        else if (!finishPos.length) {
+            newGrid[yPos][xPos].isFinish = true;
+            setFinishPos([yPos, xPos]);
+        }
+        else {
+            newGrid[yPos][xPos].isWall = !newGrid[yPos][xPos].isWall;
+            setGrid(newGrid);
+        }
     }
 
     const setupGrid = () => {
@@ -56,7 +76,7 @@ function PathVisualizer() {
             setGrid(setupGrid());
             setLoading(false);
         }
-    })
+    }, [grid])
 
     const setVisited = (x, visited) => {
         const node = visited[x];
@@ -84,12 +104,13 @@ function PathVisualizer() {
             x++;
             if (x < visited.length - 1) updateNodes(visited, x, finish);
             if (x == visited.length - 1) createPath(finish, finish.length - 3);
-        }, );
+        },);
     }
 
     const startDijsktra = () => {
-        const startNode = grid[START_Y_POS][START_Y_POS];
-        const finishNode = grid[FINISH_Y_POS][FINISH_X_POS];
+        reRender();
+        const startNode = grid[startPos[0]][startPos[1]];
+        const finishNode = grid[finishPos[0]][finishPos[1]];
 
         const visited = dijkstra(grid, startNode, finishNode);
         const path = pathFind(finishNode);
