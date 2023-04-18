@@ -1,13 +1,17 @@
 import { listNodes } from "./globalMethods";
 
-function dijkstra(grid, startNode, finishNode) {
+function aStar(grid, startNode, finishNode) {
     const visitedNodes = [];
 
     startNode.distance = 0;
+    startNode.hVal = calculateHVal(startNode, finishNode);
+
     const unvisitedNodes = listNodes(grid);
 
     while (!!unvisitedNodes.length) {
-        unvisitedNodes.sort((nodeOne, nodeTwo) => nodeOne.distance - nodeTwo.distance)
+        unvisitedNodes.sort((nodeOne, nodeTwo) => { return (nodeOne.distance + nodeOne.hVal) - (nodeTwo.distance + nodeTwo.hVal) || nodeOne.hVal - nodeTwo.hVal });
+
+
         const nextNode = unvisitedNodes.shift();
 
         if (nextNode.isWall) continue;
@@ -17,15 +21,16 @@ function dijkstra(grid, startNode, finishNode) {
         nextNode.isVisited = true;
         visitedNodes.push(nextNode);
         if (nextNode === finishNode) return visitedNodes;
-        updateNodes(nextNode, grid);
+        updateNodes(nextNode, finishNode, grid);
     }
 }
 
-function updateNodes(node, grid) {
+function updateNodes(node, finishNode, grid) {
     const nearbyNodes = getNearbyNodes(node, grid);
 
     for (const nearbyNode of nearbyNodes) {
         nearbyNode.distance = node.distance + 1;
+        nearbyNode.hVal = calculateHVal(nearbyNode, finishNode);
         nearbyNode.previousNode = node;
     }
 }
@@ -42,4 +47,11 @@ function getNearbyNodes(node, grid) {
     return nodes.filter(node => !node.isVisited);
 }
 
-export { dijkstra }
+function calculateHVal(nodeA, nodeB) {
+    var total = 0;
+    total += Math.abs(nodeA.xPos - nodeB.xPos);
+    total += Math.abs(nodeA.yPos - nodeB.yPos);
+    return total;
+}
+
+export { aStar }

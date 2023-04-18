@@ -1,11 +1,16 @@
 import { useEffect, useInsertionEffect, useState } from "react";
 import { Node } from "./Node/node"
 import "./path-visualizer.css"
-import { dijkstra, pathFind } from "../algorithm/dijkstra";
+import { dijkstra } from "../algorithm/dijkstra";
+import { aStar } from "../algorithm/a-star";
+import { pathFind } from "../algorithm/globalMethods";
 
 function PathVisualizer() {
     const [grid, setGrid] = useState([]);
     const [isLoading, setLoading] = useState(true);
+
+    const [pathLength, setPathLength] = useState("");
+    const [nodesLength, setNodesLength] = useState("");
 
     const [startPos, setStartPos] = useState([]);
     const [finishPos, setFinishPos] = useState([]);
@@ -18,6 +23,13 @@ function PathVisualizer() {
             for (var x in grid[0]) {
                 
                 const node = grid[y][x];
+                node.distance = Infinity;
+                node.hVal = Infinity;
+                node.isVisited = false;
+
+                setPathLength("");
+                setNodesLength("");
+
                 if(node.isStart) document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node start";
                 else if(node.isFinish) document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node finish";
                 else if(node.isWall) document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node wall";
@@ -31,6 +43,7 @@ function PathVisualizer() {
             xPos: xPos,
             yPos: yPos,
             distance: Infinity,
+            hVal: Infinity,
             isWall: false,
             isStart: xPos === startPos[1] && yPos === startPos[0],
             isFinish: xPos === finishPos[1] && yPos === finishPos[0],
@@ -84,9 +97,7 @@ function PathVisualizer() {
     }
 
     const setPath = (x, finish) => {
-
         const node = finish[x];
-        console.log(x)
         document.getElementById(`node-${node.xPos}-${node.yPos}`).className = "node path";
     }
 
@@ -103,7 +114,7 @@ function PathVisualizer() {
             setVisited(x, visited);
             x++;
             if (x < visited.length - 1) updateNodes(visited, x, finish);
-            if (x == visited.length - 1) createPath(finish, finish.length - 3);
+            if (x == visited.length - 1) createPath(finish, finish.length - 2);
         },);
     }
 
@@ -115,7 +126,23 @@ function PathVisualizer() {
         const visited = dijkstra(grid, startNode, finishNode);
         const path = pathFind(finishNode);
 
-        console.log(path.length)
+        setPathLength(`Dijkstra path length: ${path.length - 1}`)
+        setNodesLength(`Total Nodes Visited: ${visited.length - 1}`)
+
+        updateNodes(visited, 1, path);
+    }
+
+    const startAStar = () => {
+        reRender();
+        const startNode = grid[startPos[0]][startPos[1]];
+        const finishNode = grid[finishPos[0]][finishPos[1]];
+
+        const visited = aStar(grid, startNode, finishNode);
+        const path = pathFind(finishNode);
+
+        setPathLength(`A* path length: ${path.length - 1}`)
+        setNodesLength(`Total Nodes Visited: ${visited.length - 1}`)
+
         updateNodes(visited, 1, path);
     }
 
@@ -124,8 +151,11 @@ function PathVisualizer() {
             <div className="header">
                 <h1 className="title">Shortest Path Visualizer</h1>
                 <p>Click on a box to turn it into a wall. Click start to find the shortest path from the green box to the red.</p>
-                <button onClick={startDijsktra}>Start</button>
+                <button onClick={startDijsktra}>Start Dijkstra</button>
+                <button onClick={startAStar}>Start A*</button>
             </div>
+            {pathLength !== "" && <p>{pathLength}</p>}
+            {nodesLength !== "" && <p>{nodesLength}</p>}
             <div id="gridBox" className="gridBox">
                 {grid.map((row, indexY) => (
                     <div id={`row${indexY}`} key={`row${indexY}`} className="gridRow">
