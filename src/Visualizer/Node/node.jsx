@@ -1,6 +1,7 @@
 import "./node.css"
 
 function Node(props) {
+    // ===== GLOBAL VARIABLES =====
     const xPos = props.xPos;
     const yPos = props.yPos;
 
@@ -10,7 +11,7 @@ function Node(props) {
 
     const onClick = props.onClick;
 
-    const color = isStart ? "start" : isFinish ? "finish" : isWall ? "wall" : ""
+    const color = isStart ? "start" : isFinish ? "finish" : isWall ? "wall" : "" // updates className CSS elements based on javascript elements passed to it
 
     return (
         <div
